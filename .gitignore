@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+tovenv/
+output/raw_*.json
+output/picks_*.json
+output/seen_topics.json

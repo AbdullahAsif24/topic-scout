@@ -1,0 +1,4 @@
+pyyaml
+groq
+python-dotenv
+requests

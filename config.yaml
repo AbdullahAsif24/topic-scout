@@ -1,0 +1,23 @@
+# Keywords the agent searches for. Edit freely — no code changes needed.
+keywords:
+  - "AI automation agency"
+  - "WhatsApp chatbot business"
+  - "AI voice agents"
+  - "web development trends"
+  - "App development trends"
+  - "web design trends"
+  - "App design trends"
+
+# Which sources to pull from (must match adapters in fetch_topics.py)
+sources:
+  - reddit
+  - github
+  - youtube
+
+# How many raw items to collect per keyword per source before scoring
+items_per_source: 3
+
+# How many final topics to output per day
+topics_per_day: 2
+
+output_dir: "output"
