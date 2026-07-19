@@ -17,6 +17,7 @@ stays in sync automatically if you swap an adapter later.
 
 import json
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -124,8 +125,9 @@ def fetch_github(keyword: str, limit: int) -> list[dict]:
 
 
 def fetch_youtube(keyword: str, limit: int) -> list[dict]:
+    yt_dlp_path = str(Path(sys.executable).parent / "yt-dlp.exe")
     out = run_cli(
-        ["yt-dlp", f"ytsearch{limit}:{keyword}", "--dump-json", "--no-download", "--flat-playlist"]
+        [yt_dlp_path, f"ytsearch{limit}:{keyword}", "--dump-json", "--no-download", "--flat-playlist"]
     )
     if not out:
         return []
