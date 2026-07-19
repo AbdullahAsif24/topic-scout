@@ -17,7 +17,7 @@ sources:
 # How many raw items to collect per keyword per source before scoring
 items_per_source: 3
 
-# How many final topics to output per day
+# How many final topics to output pcontent0geer day
 topics_per_day: 2
 
 output_dir: "output"
