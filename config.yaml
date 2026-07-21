@@ -10,7 +10,7 @@ keywords:
 
 # Which sources to pull from (must match adapters in fetch_topics.py)
 sources:
-  - reddit
+  - google_news
   - github
   - youtube
 

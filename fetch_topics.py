@@ -74,10 +74,15 @@ def fetch_twitter(keyword: str, limit: int) -> list[dict]:
 def fetch_reddit(keyword: str, limit: int) -> list[dict]:
     try:
         resp = requests.get(
-            "https://www.reddit.com/search.json",
+            "https://old.reddit.com/search.json",
             params={"q": keyword, "sort": "hot", "limit": limit},
-            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},
-            timeout=10,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                "Accept": "application/json",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Accept-Encoding": "gzip, deflate",
+            },
+            timeout=15,
         )
         if resp.status_code != 200:
             print(f"  [warn] Reddit returned status {resp.status_code}")
@@ -99,6 +104,44 @@ def fetch_reddit(keyword: str, limit: int) -> list[dict]:
         }
         for c in children
     ]
+
+
+def fetch_google_news(keyword: str, limit: int) -> list[dict]:
+    """Fallback news source using Google News RSS feed."""
+    import xml.etree.ElementTree as ET
+
+    try:
+        resp = requests.get(
+            "https://news.google.com/rss/search",
+            params={"q": keyword, "hl": "en-US", "gl": "US", "ceid": "US:en"},
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            },
+            timeout=15,
+        )
+        if resp.status_code != 200:
+            print(f"  [warn] Google News returned status {resp.status_code}")
+            return []
+        root = ET.fromstring(resp.content)
+        items = []
+        for item in root.findall(".//item")[:limit]:
+            title = item.findtext("title", "")
+            link = item.findtext("link", "")
+            pub_date = item.findtext("pubDate", "")
+            source_el = item.find("{http://search.yahoo.com/mrss/}content")
+            if source_el is None:
+                source_el = item.find("{http://search.yahoo.com/mrss/}thumbnail")
+            items.append({
+                "source": "google_news",
+                "title": title,
+                "url": link,
+                "engagement": 0,
+                "created_at": pub_date,
+            })
+        return items
+    except Exception as e:
+        print(f"  [warn] Google News request failed: {e}")
+        return []
 
 
 def fetch_github(keyword: str, limit: int) -> list[dict]:
@@ -125,9 +168,9 @@ def fetch_github(keyword: str, limit: int) -> list[dict]:
 
 
 def fetch_youtube(keyword: str, limit: int) -> list[dict]:
-    yt_dlp_path = str(Path(sys.executable).parent / "yt-dlp.exe")
+    yt_dlp_bin = "yt-dlp"
     out = run_cli(
-        [yt_dlp_path, f"ytsearch{limit}:{keyword}", "--dump-json", "--no-download", "--flat-playlist"]
+        [yt_dlp_bin, f"ytsearch{limit}:{keyword}", "--dump-json", "--no-download", "--flat-playlist"]
     )
     if not out:
         return []
@@ -154,6 +197,7 @@ FETCHERS = {
     "reddit": fetch_reddit,
     "github": fetch_github,
     "youtube": fetch_youtube,
+    "google_news": fetch_google_news,
 }
 
 
