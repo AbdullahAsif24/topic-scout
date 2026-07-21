@@ -13,6 +13,7 @@ sources:
   - google_news
   - github
   - youtube
+  - hackernews
 
 # How many raw items to collect per keyword per source before scoring
 items_per_source: 3

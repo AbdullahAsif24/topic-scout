@@ -192,12 +192,40 @@ def fetch_youtube(keyword: str, limit: int) -> list[dict]:
     return items
 
 
+def fetch_hackernews(keyword: str, limit: int) -> list[dict]:
+    """Hacker News via Algolia search API — sorted by relevance/popularity."""
+    try:
+        resp = requests.get(
+            "https://hn.algolia.com/api/v1/search_by_date",
+            params={"query": keyword, "tags": "story", "hitsPerPage": limit},
+            timeout=15,
+        )
+        if resp.status_code != 200:
+            print(f"  [warn] Hacker News returned status {resp.status_code}")
+            return []
+        hits = resp.json().get("hits", [])
+        return [
+            {
+                "source": "hackernews",
+                "title": h.get("title", ""),
+                "url": h.get("url") or f"https://news.ycombinator.com/item?id={h.get('objectID', '')}",
+                "engagement": h.get("points", 0) + h.get("num_comments", 0),
+                "created_at": h.get("created_at", ""),
+            }
+            for h in hits
+        ]
+    except Exception as e:
+        print(f"  [warn] Hacker News request failed: {e}")
+        return []
+
+
 FETCHERS = {
     "twitter": fetch_twitter,
     "reddit": fetch_reddit,
     "github": fetch_github,
     "youtube": fetch_youtube,
     "google_news": fetch_google_news,
+    "hackernews": fetch_hackernews,
 }
 
 
